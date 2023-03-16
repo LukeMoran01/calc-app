@@ -1,19 +1,28 @@
 import './App.css';
 import { useState } from 'react';
 
+/*
+Need to refactor all code to treat number as a string just for this decimal test
+
+*/
+
 function Calculator() {
-  const [number, setNumber] = useState(0);
-  const [calc, setCalc] = useState(0);
+  const [number, setNumber] = useState('0');
+  const [calc, setCalc] = useState('0');
   const [currentOp, setCurrentOp] = useState('');
   // Use to determine when to overwrite display number such as at start and after equals
   const [returned, setReturned] = useState(true); 
 
+  // Seems to work in the new string system with decimals working
+  // Next is operations
   function handleNumberPress(num) {
-    if (returned) {
+    if (returned && num === '0') {
+      return;
+    } else if(returned) {
       setNumber(num);
       setReturned(false);
     } else {
-      setNumber(+[number, num].join(''))
+      setNumber([number, num].join(''));
     }
   }
 
@@ -40,13 +49,14 @@ function Calculator() {
   // Refactor ^^ this mess with the function at the bottom
   function handleOperatorPress(op) {
     performOperation(currentOp)
-    setNumber(0);
+    setNumber('0');
     setCurrentOp(op)
+    setReturned(true);
   }
 
   function handleClear() {
-    setNumber(0);
-    setCalc(0);
+    setNumber('0');
+    setCalc('0');
     setCurrentOp('');
     setReturned(true);
   }
@@ -62,50 +72,62 @@ function Calculator() {
     setReturned(true);
   }
 
+  function handleDecimal() {
+    if (number.includes('.')) {
+      return;
+    } else {
+      setNumber(`${number}.`);
+    }
+  }
+
   return (
     <div className="calculator">
-      <Display primDisplay={number} secDisplay={calc} />
+      <SecDisplay secDisplay={calc} />
+      <Display primDisplay={number}/>
       <div className="numpad">
         {Array(10).fill(null).map((_, i) =>
-          <Number key={i} num={i} press={() => handleNumberPress(i)} />)}
-        <Decimal />
+          <Number identity={idArray[i]} key={i} num={`${i}`} press={() => handleNumberPress(`${i}`)} />)}
+        <Decimal decimalPress={handleDecimal} />
       </div>
       <div className="opspad">
         <Clear clear={handleClear} />
-        <Operator operation={() => handleOperatorPress("+")} operator="+" />
-        <Operator operation={() => handleOperatorPress("-")} operator="-" />
-        <Operator operation={() => handleOperatorPress("*")} operator="*" />
-        <Operator operation={() => handleOperatorPress("/")} operator="/" />
+        <Operator identity='add' operation={() => handleOperatorPress("+")} operator="+" />
+        <Operator identity='subtract' operation={() => handleOperatorPress("-")} operator="-" />
+        <Operator identity='multiply' operation={() => handleOperatorPress("*")} operator="*" />
+        <Operator identity='divide' operation={() => handleOperatorPress("/")} operator="/" />
         <Equals equals={handleEquals}/>
       </div>
     </div>
   );
 }
 
-function Number({ num, press }) {
+function Number({identity, num, press }) {
   return (
-    <button onClick={press} className="number">{num}</button>
+    <button id={identity} onClick={press} className="number">{num}</button>
   );
 }
 
-function Decimal() {
+function Decimal({decimalPress}) {
   return (
-    <button id="decimal" className="decimal">.</button>
+    <button onClick={decimalPress} id="decimal" className="decimal">.</button>
   )
 }
 
-function Display({ primDisplay, secDisplay }) {
+function SecDisplay({secDisplay}) {
   return (
-    <div id="display">
-      <p id="secondary-display" className="display">{secDisplay}</p>
-      <p id="primary-display" className="display">{primDisplay}</p>
-      </div>
+    <p id="secondary-display" className="display">{secDisplay}</p>
   )
 }
 
-function Operator({ operator, operation }) {
+function Display({ primDisplay}) {
   return (
-    <button onClick={operation} className="operator">{operator}</button>
+      <p id="display" className="display">{primDisplay}</p>
+  )
+}
+
+function Operator({ identity ,operator, operation }) {
+  return (
+    <button id={identity} onClick={operation} className="operator">{operator}</button>
   )
 }
 
@@ -120,6 +142,8 @@ function Clear({clear}) {
     <button onClick={clear} id="clear" className="clear">C</button>
   )
 }
+
+const idArray = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
 
 function performOp(number, calc, op) {
   switch(op) {
