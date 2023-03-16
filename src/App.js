@@ -29,16 +29,16 @@ function Calculator() {
   function performOperation(op) {
     switch(op) {
       case '+':
-        setCalc(calc+number);
+        setCalc(+calc+ +number);
         break;
       case '-':
-        setCalc(calc-number);
+        setCalc(+calc- +number);
         break;
       case '*':
-        setCalc(calc*number);
+        setCalc(+calc* +number);
         break;
       case '/':
-        setCalc(calc/number);
+        setCalc(+calc/ +number);
         break;
       default:
         setCalc(number)
@@ -77,6 +77,7 @@ function Calculator() {
       return;
     } else {
       setNumber(`${number}.`);
+      if (returned) setReturned(false);
     }
   }
 
@@ -148,13 +149,13 @@ const idArray = ["zero", "one", "two", "three", "four", "five", "six", "seven", 
 function performOp(number, calc, op) {
   switch(op) {
     case '+':
-      return calc+number;
+      return +calc+ +number;
     case '-':
-      return calc-number;
+      return +calc- +number;
     case '*':
-      return calc*number;
+      return +calc* +number;
     case '/':
-      return calc/number;
+      return +calc/+number;
     default:
       return number;
   }
